@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+
+from network_address_converter import NetworkAddressConverter
+from argparse import ArgumentParser
+from argparse import ArgumentDefaultsHelpFormatter
+
+#
+# main
+#
+ap = ArgumentParser(
+        description="converter of a network address like string.",
+        formatter_class=ArgumentDefaultsHelpFormatter)
+ap.add_argument("number", nargs="+",
+                help="any number-like string. you can use mask.")
+ap.add_argument("-4", action="store_true", dest="to_ip4",
+                help="convert into IPv4 address. alias to option -d -e1 -D.")
+ap.add_argument("-6", action="store_true", dest="to_ip6",
+                help="convert into IPv6 address. alias to option -x -e2 -D:")
+ap.add_argument("-m", action="store_true", dest="to_mac",
+                help="convert into hex string separated by ':' for each byte. "
+                "alias to -x -e1 -D:")
+ap.add_argument("-b", action="store_true", dest="to_bin",
+                help="convert into a bit string for each byte. "
+                "with -e1 -D. as default")
+ap.add_argument("-x", action="store_true", dest="to_hex",
+                help="convert into a hex string.  with -e1 -D' ' as default")
+ap.add_argument("-X", action="store_true", dest="to_hex_0x",
+                help="convert into a continous hex string followed by '0x'.")
+ap.add_argument("-d", action="store_true", dest="to_dec",
+                help="convert into decimal.")
+ap.add_argument("-r", action="store_true", dest="to_rev4",
+                help="convert into a string for IPv4 reverse lookup.")
+ap.add_argument("-R", action="store_true", dest="to_rev6",
+                help="convert into a string for IPv6 reverse lookup.")
+ap.add_argument("-c", action="store_true", dest="capitalize",
+                help="specify to capitalize the output.")
+ap.add_argument("-e", action="store", dest="pair_size",
+                type=int,
+                help="specify the number of pair of bytes.")
+ap.add_argument("-D", action="store", dest="dlm",
+                help="specify delimiter.")
+ap.add_argument("-f", action="store", dest="from_type",
+                help="specify the type of the input string. "
+                "by default, it will guess what. "
+                "valid key is either: b,x,d,r")
+ap.add_argument("-v", action="store_true", dest="verbose",
+                help="enable verbose mode.")
+opt = ap.parse_args()
+
+if not sum([opt.to_ip4, opt.to_ip6, opt.to_mac, opt.to_bin, opt.to_hex,
+            opt.to_hex_0x, opt.to_dec, opt.to_rev4, opt.to_rev6]):
+    opt.to_hex = True
+
+# conversion
+nc = NetworkAddressConverter(" ".join(opt.number), verbose=opt.verbose)
+if opt.to_ip4:
+    print(nc.to_dec(pair_size=1, dlm="."))
+if opt.to_ip6:
+    print(nc.to_hex(pair_size=2, dlm=":", capitalize=opt.capitalize))
+if opt.to_mac:
+    print(nc.to_hex(pair_size=1, dlm=":", capitalize=opt.capitalize))
+if opt.to_bin:
+    if opt.pair_size is None:
+        pair_size = 1
+    else:
+        pair_size = opt.pair_size
+    if opt.dlm is None:
+        dlm = "."
+    else:
+        dlm = opt.dlm
+    print(nc.to_bin(pair_size=pair_size, dlm=dlm))
+if opt.to_hex:
+    if opt.pair_size is None:
+        pair_size = 1
+    else:
+        pair_size = opt.pair_size
+    if opt.dlm is None:
+        dlm = " "
+    else:
+        dlm = opt.dlm
+    print(nc.to_hex(pair_size=pair_size, dlm=dlm, capitalize=opt.capitalize))
+if opt.to_hex_0x:
+    print(nc.to_hex(capitalize=opt.capitalize))
+if opt.to_dec:
+    print(nc.to_dec(pair_size=opt.pair_size, dlm=opt.dlm))
+if opt.to_rev4:
+    print(nc.to_rev(ipv4=True))
+if opt.to_rev6:
+    print(nc.to_rev(ipv4=False, capitalize=opt.capitalize))
+
