@@ -22,13 +22,14 @@ class NetworkAddressConverter:
             ( "^([0-9a-f\.]+)\.IP6\.INT\.$", self.cv_from_ip6ptr ),
             # represented by a bit (01) string separated by [\.:] for each byte.
             ( "^[01]{8}([\.:][01]{8})*$", self.cv_from_bit ),
-            # represented by a continuous hex string.
-            ( "^0x[0-9a-f]+$", self.cv_from_hex ),
             # represented by less than or equal to 6 hex strings
             # separated by a colon ":" for each byte.
             # including a mac address.
             # must be evaluated before the regex for ipv6 address.
             ( "^[0-9a-f]{2}(:[0-9a-f]{2}){,5}$", self.cv_from_mac ),
+            # represented by a continuous hex string.
+            ( "^0x[0-9a-f]+$", self.cv_from_hex ),
+            ( "^[0-9a-f]{2}(\s[0-9a-f]{2})+$", self.cv_from_hex ),
             # a decimal string.
             ( "^[0-9]+$", self.cv_from_dec ),
             # represented by a dicimal setring separated by "." for each byte.
@@ -176,7 +177,7 @@ class NetworkAddressConverter:
     def cv_from_hex(self, str_num, mask):
         if mask != -1:
             raise ValueError("mask is not allowed for this conversion.")
-        num = self.int_to_x(int(str_num, 16))
+        num = self.int_to_x(int("".join(str_num.split()), 16))
         if self.verbose:
             print("hex:", str_num)
             print("num:", num)
