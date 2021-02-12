@@ -4,7 +4,7 @@ import re
 from ipaddress import ip_network, ip_address
 
 class NetworkAddressConverter:
-    def __init__(self, input_str, verbose=False):
+    def __init__(self, input_str, from_type=None, verbose=False):
         """
         convert input_str into ...
         set it into self.num.
@@ -40,8 +40,19 @@ class NetworkAddressConverter:
             # must be evaluated after the regex for a mac address form.
             ( "^[0-9a-f:]+$", self.cv_from_ip6 ),
         ]
+        self.from_type_map = {
+            "b": self.cv_from_bit,
+            "x": self.cv_from_hex,
+            "d": self.cv_from_dec,
+            "m": self.cv_from_mac,
+        }
 
-        # guessing
+        cb = self.from_type_map.get(from_type)
+        if cb is not None:
+            self.num = cb(str_num, mask)
+            return
+
+        # otherwise, guessing
         for patt,cb in self.patterns:
             r = re.match(patt, str_num, re.IGNORECASE)
             if r is not None:

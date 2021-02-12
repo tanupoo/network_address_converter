@@ -42,7 +42,7 @@ ap.add_argument("-D", action="store", dest="dlm",
 ap.add_argument("-f", action="store", dest="from_type",
                 help="specify the type of the input string. "
                 "by default, it will guess what. "
-                "valid key is either: b,x,d,r")
+                "valid key is either: b,x,d,m")
 ap.add_argument("-v", action="store_true", dest="verbose",
                 help="enable verbose mode.")
 opt = ap.parse_args()
@@ -52,7 +52,8 @@ if not sum([opt.to_ip4, opt.to_ip6, opt.to_mac, opt.to_bin, opt.to_hex,
     opt.to_hex = True
 
 # conversion
-nc = NetworkAddressConverter(" ".join(opt.number), verbose=opt.verbose)
+nc = NetworkAddressConverter(" ".join(opt.number), from_type=opt.from_type,
+                             verbose=opt.verbose)
 if opt.to_ip4:
     print(nc.to_dec(pair_size=1, dlm="."))
 if opt.to_ip6:
